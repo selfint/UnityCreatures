@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Random=UnityEngine.Random;
+using Random = UnityEngine.Random;
 
 public class GameManagerScript : MonoBehaviour {
 
@@ -27,7 +27,7 @@ public class GameManagerScript : MonoBehaviour {
 
     void spawnFoodDispensers() {
         for (int i = 0; i < foodDispenserAmount; i++) {
-            Vector3 randomPosition = new Vector3(Random.Range(0, this.worldX), 0, 
+            Vector3 randomPosition = new Vector3(Random.Range(0, this.worldX), 0,
                                                  Random.Range(0, this.worldZ));
             Instantiate(foodDispenserPrefab, randomPosition, Quaternion.identity);
         }
@@ -62,25 +62,33 @@ public class GameManagerScript : MonoBehaviour {
         // fixed update won't get called if timescale is set to 0
         if (timeScale != 0)
             Time.timeScale = timeScale;
-        applyFlowField();
-    }
 
-    void applyFlowField() {
-
-        // add a flow field vector for each creature using perlin noise
+        // iterate over all creatures
         foreach (GameObject creature in this.population) {
-            Vector3 creaturePos = creature.transform.position;
-            creature.GetComponent<Rigidbody>().AddForce(calcFlowFieldVector(creaturePos), ForceMode.Acceleration);
+            applyFlowField(creature);
+            CreatureScript creatureScript = creature.GetComponent<CreatureScript>();
+
+            // kill dead creatrues
+            if (creatureScript.dead)
+                killCreature(creature);
         }
+        
     }
 
-    Vector3 calcFlowFieldVector(Vector3 position) {
-        
-        // offset the noise values of each axis so the vectors look more natural
-        float noiseX = Mathf.PerlinNoise(position.x + position.z + this.xOffset, position.y + this.xOffset) - 0.5f;
-        float noiseY = Mathf.PerlinNoise(position.x + position.z + this.yOffset, position.y + this.yOffset) - 0.5f;
-        float noiseZ = Mathf.PerlinNoise(position.x + position.z + this.zOffset, position.y + this.zOffset) - 0.5f;
-        return new Vector3(noiseX, noiseY, noiseZ);
-    }
+void applyFlowField(GameObject creature) {
+
+    // add a flow field vector for each creature using perlin noise
+    Vector3 creaturePos = creature.transform.position;
+    creature.GetComponent<Rigidbody>().AddForce(calcFlowFieldVector(creaturePos), ForceMode.Acceleration);
+}
+
+Vector3 calcFlowFieldVector(Vector3 position) {
+
+    // offset the noise values of each axis so the vectors look more natural
+    float noiseX = Mathf.PerlinNoise(position.x + position.z + this.xOffset, position.y + this.xOffset) - 0.5f;
+    float noiseY = Mathf.PerlinNoise(position.x + position.z + this.yOffset, position.y + this.yOffset) - 0.5f;
+    float noiseZ = Mathf.PerlinNoise(position.x + position.z + this.zOffset, position.y + this.zOffset) - 0.5f;
+    return new Vector3(noiseX, noiseY, noiseZ);
+}
 
 }
