@@ -8,10 +8,13 @@ public class CreatureScript : MonoBehaviour {
     public GameObject mouth;
     public GameObject womb;
     public GameObject[] blocks;
-    public float initialHealth = 100f;
-    public float initialEnergy = 100f;
+    public float initialHealth;
+    public float initialEnergy;
     public float health, energy;
     public bool dead = false;
+    public float foodValueMultiplier;
+    public float costOfLiving;
+    public float dyingSpeed;
 
     void Start() {
         // set the creature mass to be the sum of its blocks mass
@@ -22,11 +25,11 @@ public class CreatureScript : MonoBehaviour {
 
     void FixedUpdate() {
         // decrease energy as long as creature is alive
-        this.energy = Mathf.Max(0, this.energy - 1);
+        this.energy = Mathf.Max(0, this.energy - costOfLiving);
 
         // if energy is 0 decrease the creature's health
         if (this.energy <= 0) {
-            this.health -= 1;
+            this.health -= dyingSpeed;
         }
 
         // if the creature has energy, regain health up to initial health
@@ -40,7 +43,7 @@ public class CreatureScript : MonoBehaviour {
     }
 
     public void EatFood(GameObject food) {
-        this.energy += 1;
+        this.energy += food.transform.localScale.x * foodValueMultiplier;
         Destroy(food);
     }
 
