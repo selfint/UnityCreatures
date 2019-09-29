@@ -1,23 +1,37 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random=UnityEngine.Random;
 
 public class GameManagerScript : MonoBehaviour {
 
     public float timeScale = 1f;
     public int initialPopulationSize = 10;
     public GameObject creaturePrefab;
+    public GameObject foodDispenserPrefab;
     private List<GameObject> population;
     public Transform spawnLocation;
     public float spawnNoise = 10f;
     public int worldX, worldY, worldZ;
     private float xOffset, yOffset, zOffset;
 
+    public int foodDispenserAmount;
+
     void Start() {
         spawnInitialPopulation();
+        spawnFoodDispensers();
         this.xOffset = 0f;
         this.yOffset = worldX * worldY;
         this.zOffset = worldX * worldY * 2;
+    }
+
+    void spawnFoodDispensers() {
+        for (int i = 0; i < foodDispenserAmount; i++) {
+            Vector3 randomPosition = new Vector3(Random.Range(0, this.worldX), 0, 
+                                                 Random.Range(0, this.worldZ));
+            Instantiate(foodDispenserPrefab, randomPosition, Quaternion.identity);
+        }
     }
 
     void spawnInitialPopulation() {
@@ -25,15 +39,15 @@ public class GameManagerScript : MonoBehaviour {
         for (int i = 0; i < this.initialPopulationSize; i++) {
             GameObject newCreature = Instantiate(creaturePrefab,
                                                  randomSpawnLocation(spawnLocation.position, spawnNoise),
-                                                 Quaternion.identity);
+                                                 Random.rotation);
             this.population.Add(newCreature);
         }
     }
 
     Vector3 randomSpawnLocation(Vector3 center, float noise) {
         float x = center.x + Random.Range(-noise, noise);
-        float y = center.y + Random.Range(-noise, noise);
-        float z = center.z;
+        float y = center.y + Random.Range(-noise / 10, noise / 10);
+        float z = center.z + Random.Range(-noise, noise);
         return new Vector3(x, y, z);
     }
 
