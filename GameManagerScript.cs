@@ -29,7 +29,8 @@ public class GameManagerScript : MonoBehaviour {
         for (int i = 0; i < foodDispenserAmount; i++) {
             Vector3 randomPosition = new Vector3(Random.Range(0, this.worldX), 0,
                                                  Random.Range(0, this.worldZ));
-            Instantiate(foodDispenserPrefab, randomPosition, Quaternion.identity);
+            GameObject foodDispenser = Instantiate(foodDispenserPrefab, randomPosition, Quaternion.identity);
+            foodDispenser.GetComponent<FoodDispenserScript>().gameManager = gameObject;
         }
     }
 

@@ -5,6 +5,7 @@ using UnityEngine;
 public class FoodDispenserScript : MonoBehaviour {
 
     public GameObject foodPrefab;
+    public GameObject gameManager;
     public Transform foodSpawnLocation;
     public float foodSpawnRate;
     private float lastSpawn;
@@ -28,6 +29,7 @@ public class FoodDispenserScript : MonoBehaviour {
     }
 
     void SpawnFood() {
-        Instantiate(foodPrefab, foodSpawnLocation.position, foodSpawnLocation.rotation);
+        GameObject food = Instantiate(foodPrefab, foodSpawnLocation.position, foodSpawnLocation.rotation);
+        food.GetComponent<FoodScript>().gameManager = gameManager.GetComponent<GameManagerScript>();
     }
 }
