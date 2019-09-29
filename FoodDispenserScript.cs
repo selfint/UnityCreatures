@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class FoodDispenserScript : MonoBehaviour {
 
-    public GameObject FoodPrefab;
-    public Transform FoodSpawnLocation;
-    public float FoodSpawnRate;
-    private float LastSpawn;
+    public GameObject foodPrefab;
+    public Transform foodSpawnLocation;
+    public float foodSpawnRate;
+    private float lastSpawn;
 
     // Start is called before the first frame update
     void Start() {
-        this.LastSpawn = 0f;
+        this.lastSpawn = 0f;
     }
 
     // Update is called once per frame
@@ -20,14 +20,14 @@ public class FoodDispenserScript : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        if (this.LastSpawn >= this.FoodSpawnRate) {
+        if (this.lastSpawn >= this.foodSpawnRate) {
             SpawnFood();
-            this.LastSpawn = 0f;
+            this.lastSpawn = 0f;
         }
-        this.LastSpawn += Time.fixedDeltaTime;
+        this.lastSpawn += Time.fixedDeltaTime;
     }
 
     void SpawnFood() {
-        Instantiate(FoodPrefab, FoodSpawnLocation.position, FoodSpawnLocation.rotation);
+        Instantiate(foodPrefab, foodSpawnLocation.position, foodSpawnLocation.rotation);
     }
 }
