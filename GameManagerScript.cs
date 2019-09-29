@@ -82,7 +82,7 @@ void applyFlowField(GameObject creature) {
     creature.GetComponent<Rigidbody>().AddForce(calcFlowFieldVector(creaturePos), ForceMode.Acceleration);
 }
 
-Vector3 calcFlowFieldVector(Vector3 position) {
+public Vector3 calcFlowFieldVector(Vector3 position) {
 
     // offset the noise values of each axis so the vectors look more natural
     float noiseX = Mathf.PerlinNoise(position.x + position.z + this.xOffset, position.y + this.xOffset) - 0.5f;
