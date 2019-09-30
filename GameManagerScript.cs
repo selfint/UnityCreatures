@@ -32,6 +32,9 @@ public class GameManagerScript : MonoBehaviour {
         if (timeScale != 0)
             Time.timeScale = timeScale;
 
+        // update flow field to simulate changing currents
+        UpdateFlowField();
+
         // iterate over all creatures
         foreach (GameObject creature in this.population) {
             ApplyFlowField(creature);
@@ -84,6 +87,12 @@ public class GameManagerScript : MonoBehaviour {
         float y = center.y + Random.Range(0, noise / 10);
         float z = center.z + Random.Range(-noise, noise);
         return new Vector3(x, y, z);
+    }
+
+    private void UpdateFlowField() {
+        this.xOffset += 1f;
+        this.yOffset += 1f;
+        this.zOffset += 1f;
     }
 
     void ApplyFlowField(GameObject creature) {
