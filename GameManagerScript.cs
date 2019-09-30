@@ -32,7 +32,8 @@ public class GameManagerScript : MonoBehaviour {
 
     void FixedUpdate() {
 
-        // terrain.terrainData = GenerateTerrain(terrain.terrainData, 20f);
+        // TODO: implement actual terrain generation
+        terrain.terrainData = GenerateTerrain(terrain.terrainData, 20f);
 
         // fixed update won't get called if timescale is set to 0
         if (timeScale != 0)
@@ -74,10 +75,8 @@ public class GameManagerScript : MonoBehaviour {
         for (int i = 0; i < worldX; i++) {
             for (int j = 0; j < worldZ; j++) {
                 Vector3 position = new Vector3(i, y, j);
-                float xCoord = (float)i / worldX * y;
-                float yCoord = (float)j / worldZ * y;
-                heights[i, j] = GetFlowFieldVector(position).x + GetFlowFieldVector(position).z - 0.5f;
-                // heights[i, j] = Mathf.PerlinNoise(xCoord, yCoord);
+                // heights[i, j] = GetFlowFieldVector(position).x + GetFlowFieldVector(position).z + 0.5f;
+                heights[i, j] = 0f;
             }
         }
         return heights;
@@ -140,11 +139,11 @@ public class GameManagerScript : MonoBehaviour {
 
         // offset the noise values of each axis so the vectors look more natural
         float noiseX = Mathf.PerlinNoise((float)(position.x) / worldX * flowFieldScale, 
-                                         this.xOffset / worldX * flowFieldScale);
+                                         this.xOffset / worldX * flowFieldScale) - 0.5f;
         float noiseY = Mathf.PerlinNoise((float)(position.y) / worldY * flowFieldScale, 
-                                         this.yOffset / worldY * flowFieldScale);
+                                         this.yOffset / worldY * flowFieldScale) - 0.5f;
         float noiseZ = Mathf.PerlinNoise((float)(position.z) / worldZ * flowFieldScale, 
-                                         this.zOffset / worldZ * flowFieldScale);
+                                         this.zOffset / worldZ * flowFieldScale) - 0.5f;
         return new Vector3(noiseX, noiseY, noiseZ);
     }
 
