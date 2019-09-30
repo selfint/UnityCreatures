@@ -8,19 +8,17 @@ public class GameManagerScript : MonoBehaviour {
 
     public float timeScale = 1f;
     public int initialPopulationSize = 10;
-    public GameObject creaturePrefab;
-    public GameObject foodDispenserPrefab;
-    private List<GameObject> population;
-    public Transform spawnLocation;
-    public float spawnNoise = 10f;
     public int worldX, worldY, worldZ;
-    private float xOffset, yOffset, zOffset;
     public int foodDispenserAmount;
-    public float maxAltitude;
-    public Transform creatures, foods, foodDispensers;
-    public Terrain terrain;
     public float flowFieldScale;
     public float flowFieldIncrement;
+    public int maxFoods;
+    public Terrain terrain;
+    public GameObject creaturePrefab;
+    public GameObject foodDispenserPrefab;
+    public Transform creatures, foods, foodDispensers;
+    private List<GameObject> population;
+    private float xOffset, yOffset, zOffset;
 
     void Start() {
         SpawnInitialPopulation();
@@ -42,10 +40,16 @@ public class GameManagerScript : MonoBehaviour {
         // update flow field to simulate changing currents
         UpdateFlowField();
 
-        // apply flow field to food particles
+        // iterate over all food particles
         for (int i = 0; i < foods.childCount; i++) {
-            Transform food = foods.GetChild(i);
-            ApplyFlowField(food.gameObject);
+            GameObject food = foods.GetChild(i).gameObject;
+            ApplyFlowField(food);
+            WrapObject(food);
+        }
+
+        // limit food amount
+        while (foods.childCount > maxFoods) {
+            Destroy(foods.GetChild(maxFoods));
         }
 
         // iterate over all creatures
@@ -57,8 +61,7 @@ public class GameManagerScript : MonoBehaviour {
             if (creatureScript.dead)
                 KillCreature(creature);
 
-            // limit creature y value (top of the ocean)
-            LimitCreatureAltitude(creature);
+            WrapObject(creature);
         }
 
     }
@@ -81,16 +84,24 @@ public class GameManagerScript : MonoBehaviour {
         }
         return heights;
     }
-    
-    private void LimitCreatureAltitude(GameObject creature) {
+
+    private void WrapObject(GameObject creature) {
         Vector3 newPosition = creature.transform.position;
-        newPosition.y = Mathf.Min(maxAltitude, newPosition.y);
+        if (newPosition.x > worldX)
+            newPosition.x = 0;
+        if (newPosition.z > worldZ)
+            newPosition.z = 0;
+        if (newPosition.x < 0)
+            newPosition.x = worldX;
+        if (newPosition.z < 0)
+            newPosition.z = worldZ;
+        newPosition.y = Mathf.Min(worldY, newPosition.y);
         creature.transform.SetPositionAndRotation(newPosition, creature.transform.rotation);
     }
 
     void SpawnFoodDispensers() {
         for (int i = 0; i < foodDispenserAmount; i++) {
-            Vector3 randomPosition = RandomSpawnLocation(spawnLocation.position, spawnNoise);
+            Vector3 randomPosition = RandomSpawnLocation();
             randomPosition.y = 0;
             GameObject foodDispenser = Instantiate(foodDispenserPrefab, randomPosition, Quaternion.identity,
                                                    foodDispensers);
@@ -101,7 +112,7 @@ public class GameManagerScript : MonoBehaviour {
     void SpawnInitialPopulation() {
         this.population = new List<GameObject>();
         for (int i = 0; i < this.initialPopulationSize; i++) {
-            SpawnCreature(RandomSpawnLocation(spawnLocation.position, spawnNoise));
+            SpawnCreature(RandomSpawnLocation());
         }
     }
 
@@ -115,10 +126,10 @@ public class GameManagerScript : MonoBehaviour {
         Destroy(creature);
     }
 
-    Vector3 RandomSpawnLocation(Vector3 center, float noise) {
-        float x = center.x + Random.Range(-noise, noise);
-        float y = center.y;
-        float z = center.z + Random.Range(-noise, noise);
+    Vector3 RandomSpawnLocation() {
+        float x = Random.Range(0, worldX);
+        float y = Random.Range(0, worldY);
+        float z = Random.Range(0, worldZ);
         return new Vector3(x, y, z);
     }
 
@@ -138,11 +149,11 @@ public class GameManagerScript : MonoBehaviour {
     public Vector3 GetFlowFieldVector(Vector3 position) {
 
         // offset the noise values of each axis so the vectors look more natural
-        float noiseX = Mathf.PerlinNoise((float)(position.x) / worldX * flowFieldScale, 
+        float noiseX = Mathf.PerlinNoise((float)(position.x) / worldX * flowFieldScale,
                                          this.xOffset / worldX * flowFieldScale) - 0.5f;
-        float noiseY = Mathf.PerlinNoise((float)(position.y) / worldY * flowFieldScale, 
+        float noiseY = Mathf.PerlinNoise((float)(position.y) / worldY * flowFieldScale,
                                          this.yOffset / worldY * flowFieldScale) - 0.5f;
-        float noiseZ = Mathf.PerlinNoise((float)(position.z) / worldZ * flowFieldScale, 
+        float noiseZ = Mathf.PerlinNoise((float)(position.z) / worldZ * flowFieldScale,
                                          this.zOffset / worldZ * flowFieldScale) - 0.5f;
         return new Vector3(noiseX, noiseY, noiseZ);
     }
