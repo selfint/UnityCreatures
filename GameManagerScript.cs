@@ -16,6 +16,7 @@ public class GameManagerScript : MonoBehaviour {
     public int worldX, worldY, worldZ;
     private float xOffset, yOffset, zOffset;
     public int foodDispenserAmount;
+    public float maxAltitude;
 
     void Start() {
         spawnInitialPopulation();
@@ -23,6 +24,33 @@ public class GameManagerScript : MonoBehaviour {
         this.xOffset = 0f;
         this.yOffset = worldX * worldY;
         this.zOffset = worldX * worldY * 2;
+    }
+
+    void FixedUpdate() {
+
+        // fixed update won't get called if timescale is set to 0
+        if (timeScale != 0)
+            Time.timeScale = timeScale;
+
+        // iterate over all creatures
+        foreach (GameObject creature in this.population) {
+            applyFlowField(creature);
+            CreatureScript creatureScript = creature.GetComponent<CreatureScript>();
+
+            // kill dead creatures
+            if (creatureScript.dead)
+                killCreature(creature);
+            
+            // limit creature y value (top of the ocean)
+            limitCreatureAltitude(creature);
+        }
+
+    }
+
+    private void limitCreatureAltitude(GameObject creature) {
+        Vector3 newPosition = creature.transform.position;
+        newPosition.y = Mathf.Min(maxAltitude, newPosition.y);
+        creature.transform.SetPositionAndRotation(newPosition, creature.transform.rotation);
     }
 
     void spawnFoodDispensers() {
@@ -56,24 +84,6 @@ public class GameManagerScript : MonoBehaviour {
         float y = center.y + Random.Range(0, noise / 10);
         float z = center.z + Random.Range(-noise, noise);
         return new Vector3(x, y, z);
-    }
-
-    void FixedUpdate() {
-
-        // fixed update won't get called if timescale is set to 0
-        if (timeScale != 0)
-            Time.timeScale = timeScale;
-
-        // iterate over all creatures
-        foreach (GameObject creature in this.population) {
-            applyFlowField(creature);
-            CreatureScript creatureScript = creature.GetComponent<CreatureScript>();
-
-            // kill dead creatrues
-            if (creatureScript.dead)
-                killCreature(creature);
-        }
-
     }
 
     void applyFlowField(GameObject creature) {
