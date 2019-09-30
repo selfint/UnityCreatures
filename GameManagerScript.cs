@@ -80,8 +80,6 @@ public class GameManagerScript : MonoBehaviour {
         float[,] heights = new float[worldX, worldZ];
         for (int i = 0; i < worldX; i++) {
             for (int j = 0; j < worldZ; j++) {
-                Vector3 position = new Vector3(i, y, j);
-                // heights[i, j] = GetFlowFieldVector(position).x + GetFlowFieldVector(position).z + 0.5f;
                 heights[i, j] = 0f;
             }
         }
@@ -102,10 +100,14 @@ public class GameManagerScript : MonoBehaviour {
         creature.transform.SetPositionAndRotation(newPosition, creature.transform.rotation);
     }
 
+    float GetGround(float x, float z) {
+        return terrain.terrainData.GetHeight(Mathf.RoundToInt(x), Mathf.RoundToInt(z));
+    }
+
     void SpawnFoodDispensers() {
         for (int i = 0; i < foodDispenserAmount; i++) {
             Vector3 randomPosition = RandomSpawnLocation();
-            randomPosition.y = 0;
+            randomPosition.y = GetGround(randomPosition.x, randomPosition.z);
             GameObject foodDispenser = Instantiate(foodDispenserPrefab, randomPosition, Quaternion.identity,
                                                    foodDispensers);
             foodDispenser.GetComponent<FoodDispenserScript>().gameManager = gameObject;
