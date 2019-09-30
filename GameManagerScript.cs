@@ -45,7 +45,7 @@ public class GameManagerScript : MonoBehaviour {
         // apply flow field to food particles
         for (int i = 0; i < foods.childCount; i++) {
             Transform food = foods.GetChild(i);
-            food.GetComponent<Rigidbody>().AddForce(GetFlowFieldVector(food.position), ForceMode.Acceleration);
+            ApplyFlowField(food.gameObject);
         }
 
         // iterate over all creatures
