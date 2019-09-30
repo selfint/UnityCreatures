@@ -9,6 +9,8 @@ public class FoodDispenserScript : MonoBehaviour {
     public Transform foodSpawnLocation;
     public float foodSpawnRate;
     private float lastSpawn;
+    public float foodVariance;
+    public float foodMinSize;
 
     // Start is called before the first frame update
     void Start() {
@@ -30,6 +32,8 @@ public class FoodDispenserScript : MonoBehaviour {
 
     void SpawnFood() {
         GameObject food = Instantiate(foodPrefab, foodSpawnLocation.position, foodSpawnLocation.rotation);
+        float foodSize = Random.Range(foodMinSize, foodMinSize + foodVariance);
+        food.transform.localScale = new Vector3(foodSize, foodSize, foodSize);
         food.GetComponent<FoodScript>().gameManager = gameManager.GetComponent<GameManagerScript>();
     }
 }
