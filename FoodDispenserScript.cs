@@ -31,9 +31,9 @@ public class FoodDispenserScript : MonoBehaviour {
     }
 
     void SpawnFood() {
-        GameObject food = Instantiate(foodPrefab, foodSpawnLocation.position, foodSpawnLocation.rotation);
+        GameObject food = Instantiate(foodPrefab, foodSpawnLocation.position, foodSpawnLocation.rotation,
+                                      gameManager.GetComponent<GameManagerScript>().foods);
         float foodSize = Random.Range(foodMinSize, foodMinSize + foodVariance);
         food.transform.localScale = new Vector3(foodSize, foodSize, foodSize);
-        food.GetComponent<FoodScript>().gameManager = gameManager.GetComponent<GameManagerScript>();
     }
 }

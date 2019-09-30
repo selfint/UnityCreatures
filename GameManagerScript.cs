@@ -17,6 +17,7 @@ public class GameManagerScript : MonoBehaviour {
     private float xOffset, yOffset, zOffset;
     public int foodDispenserAmount;
     public float maxAltitude;
+    public Transform creatures, foods, foodDispensers;
 
     void Start() {
         SpawnInitialPopulation();
@@ -35,6 +36,12 @@ public class GameManagerScript : MonoBehaviour {
         // update flow field to simulate changing currents
         UpdateFlowField();
 
+        // apply flow field to food particles
+        for (int i = 0; i < foods.childCount; i++) {
+            Transform food = foods.GetChild(i);
+            food.GetComponent<Rigidbody>().AddForce(GetFlowFieldVector(food.position), ForceMode.Acceleration);
+        }
+        
         // iterate over all creatures
         foreach (GameObject creature in this.population) {
             ApplyFlowField(creature);
@@ -43,7 +50,7 @@ public class GameManagerScript : MonoBehaviour {
             // kill dead creatures
             if (creatureScript.dead)
                 KillCreature(creature);
-            
+
             // limit creature y value (top of the ocean)
             LimitCreatureAltitude(creature);
         }
@@ -60,7 +67,8 @@ public class GameManagerScript : MonoBehaviour {
         for (int i = 0; i < foodDispenserAmount; i++) {
             Vector3 randomPosition = RandomSpawnLocation(spawnLocation.position, spawnNoise);
             randomPosition.y = 0;
-            GameObject foodDispenser = Instantiate(foodDispenserPrefab, randomPosition, Quaternion.identity);
+            GameObject foodDispenser = Instantiate(foodDispenserPrefab, randomPosition, Quaternion.identity,
+                                                   foodDispensers);
             foodDispenser.GetComponent<FoodDispenserScript>().gameManager = gameObject;
         }
     }
@@ -73,7 +81,7 @@ public class GameManagerScript : MonoBehaviour {
     }
 
     void SpawnCreature(Vector3 location) {
-        GameObject newCreature = Instantiate(creaturePrefab, location, Random.rotation);
+        GameObject newCreature = Instantiate(creaturePrefab, location, Random.rotation, creatures);
         this.population.Add(newCreature);
     }
 
