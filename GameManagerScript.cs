@@ -53,7 +53,7 @@ public class GameManagerScript : MonoBehaviour {
 
     Vector3 randomSpawnLocation(Vector3 center, float noise) {
         float x = center.x + Random.Range(-noise, noise);
-        float y = center.y + Random.Range(-noise / 10, noise / 10);
+        float y = center.y + Random.Range(0, noise / 10);
         float z = center.z + Random.Range(-noise, noise);
         return new Vector3(x, y, z);
     }
@@ -73,23 +73,23 @@ public class GameManagerScript : MonoBehaviour {
             if (creatureScript.dead)
                 killCreature(creature);
         }
-        
+
     }
 
-void applyFlowField(GameObject creature) {
+    void applyFlowField(GameObject creature) {
 
-    // add a flow field vector for each creature using perlin noise
-    Vector3 creaturePos = creature.transform.position;
-    creature.GetComponent<Rigidbody>().AddForce(calcFlowFieldVector(creaturePos), ForceMode.Acceleration);
-}
+        // add a flow field vector for each creature using perlin noise
+        Vector3 creaturePos = creature.transform.position;
+        creature.GetComponent<Rigidbody>().AddForce(calcFlowFieldVector(creaturePos), ForceMode.Acceleration);
+    }
 
-public Vector3 calcFlowFieldVector(Vector3 position) {
+    public Vector3 calcFlowFieldVector(Vector3 position) {
 
-    // offset the noise values of each axis so the vectors look more natural
-    float noiseX = Mathf.PerlinNoise(position.x + position.z + this.xOffset, position.y + this.xOffset) - 0.5f;
-    float noiseY = Mathf.PerlinNoise(position.x + position.z + this.yOffset, position.y + this.yOffset) - 0.5f;
-    float noiseZ = Mathf.PerlinNoise(position.x + position.z + this.zOffset, position.y + this.zOffset) - 0.5f;
-    return new Vector3(noiseX, noiseY, noiseZ);
-}
+        // offset the noise values of each axis so the vectors look more natural
+        float noiseX = Mathf.PerlinNoise(position.x + position.z + this.xOffset, position.y + this.xOffset) - 0.5f;
+        float noiseY = Mathf.PerlinNoise(position.x + position.z + this.yOffset, position.y + this.yOffset) - 0.5f;
+        float noiseZ = Mathf.PerlinNoise(position.x + position.z + this.zOffset, position.y + this.zOffset) - 0.5f;
+        return new Vector3(noiseX, noiseY, noiseZ);
+    }
 
 }
