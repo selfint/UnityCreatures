@@ -19,8 +19,8 @@ public class GameManagerScript : MonoBehaviour {
     public float maxAltitude;
 
     void Start() {
-        spawnInitialPopulation();
-        spawnFoodDispensers();
+        SpawnInitialPopulation();
+        SpawnFoodDispensers();
         this.xOffset = 0f;
         this.yOffset = worldX * worldY;
         this.zOffset = worldX * worldY * 2;
@@ -34,26 +34,26 @@ public class GameManagerScript : MonoBehaviour {
 
         // iterate over all creatures
         foreach (GameObject creature in this.population) {
-            applyFlowField(creature);
+            ApplyFlowField(creature);
             CreatureScript creatureScript = creature.GetComponent<CreatureScript>();
 
             // kill dead creatures
             if (creatureScript.dead)
-                killCreature(creature);
+                KillCreature(creature);
             
             // limit creature y value (top of the ocean)
-            limitCreatureAltitude(creature);
+            LimitCreatureAltitude(creature);
         }
 
     }
 
-    private void limitCreatureAltitude(GameObject creature) {
+    private void LimitCreatureAltitude(GameObject creature) {
         Vector3 newPosition = creature.transform.position;
         newPosition.y = Mathf.Min(maxAltitude, newPosition.y);
         creature.transform.SetPositionAndRotation(newPosition, creature.transform.rotation);
     }
 
-    void spawnFoodDispensers() {
+    void SpawnFoodDispensers() {
         for (int i = 0; i < foodDispenserAmount; i++) {
             Vector3 randomPosition = new Vector3(Random.Range(0, this.worldX), 0,
                                                  Random.Range(0, this.worldZ));
@@ -62,38 +62,38 @@ public class GameManagerScript : MonoBehaviour {
         }
     }
 
-    void spawnInitialPopulation() {
+    void SpawnInitialPopulation() {
         this.population = new List<GameObject>();
         for (int i = 0; i < this.initialPopulationSize; i++) {
-            spawnCreature(randomSpawnLocation(spawnLocation.position, spawnNoise));
+            SpawnCreature(RandomSpawnLocation(spawnLocation.position, spawnNoise));
         }
     }
 
-    void spawnCreature(Vector3 location) {
+    void SpawnCreature(Vector3 location) {
         GameObject newCreature = Instantiate(creaturePrefab, location, Random.rotation);
         this.population.Add(newCreature);
     }
 
-    void killCreature(GameObject creature) {
+    void KillCreature(GameObject creature) {
         this.population.Remove(creature);
         Destroy(creature);
     }
 
-    Vector3 randomSpawnLocation(Vector3 center, float noise) {
+    Vector3 RandomSpawnLocation(Vector3 center, float noise) {
         float x = center.x + Random.Range(-noise, noise);
         float y = center.y + Random.Range(0, noise / 10);
         float z = center.z + Random.Range(-noise, noise);
         return new Vector3(x, y, z);
     }
 
-    void applyFlowField(GameObject creature) {
+    void ApplyFlowField(GameObject creature) {
 
         // add a flow field vector for each creature using perlin noise
         Vector3 creaturePos = creature.transform.position;
-        creature.GetComponent<Rigidbody>().AddForce(calcFlowFieldVector(creaturePos), ForceMode.Acceleration);
+        creature.GetComponent<Rigidbody>().AddForce(GetFlowFieldVector(creaturePos), ForceMode.Acceleration);
     }
 
-    public Vector3 calcFlowFieldVector(Vector3 position) {
+    public Vector3 GetFlowFieldVector(Vector3 position) {
 
         // offset the noise values of each axis so the vectors look more natural
         float noiseX = Mathf.PerlinNoise(position.x + position.z + this.xOffset, position.y + this.xOffset) - 0.5f;

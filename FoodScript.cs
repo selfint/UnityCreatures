@@ -9,6 +9,6 @@ public class FoodScript : MonoBehaviour {
     public GameManagerScript gameManager;
 
     void FixedUpdate() {
-        rb.AddForce(gameManager.calcFlowFieldVector(transform.position), ForceMode.Acceleration);
+        rb.AddForce(gameManager.GetFlowFieldVector(transform.position), ForceMode.Acceleration);
     }
 }
