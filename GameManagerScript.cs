@@ -58,8 +58,8 @@ public class GameManagerScript : MonoBehaviour {
 
     void SpawnFoodDispensers() {
         for (int i = 0; i < foodDispenserAmount; i++) {
-            Vector3 randomPosition = new Vector3(Random.Range(0, this.worldX), 0,
-                                                 Random.Range(0, this.worldZ));
+            Vector3 randomPosition = RandomSpawnLocation(spawnLocation.position, spawnNoise);
+            randomPosition.y = 0;
             GameObject foodDispenser = Instantiate(foodDispenserPrefab, randomPosition, Quaternion.identity);
             foodDispenser.GetComponent<FoodDispenserScript>().gameManager = gameObject;
         }
@@ -84,7 +84,7 @@ public class GameManagerScript : MonoBehaviour {
 
     Vector3 RandomSpawnLocation(Vector3 center, float noise) {
         float x = center.x + Random.Range(-noise, noise);
-        float y = center.y + Random.Range(0, noise / 10);
+        float y = center.y;
         float z = center.z + Random.Range(-noise, noise);
         return new Vector3(x, y, z);
     }
