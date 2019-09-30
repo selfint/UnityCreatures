@@ -18,6 +18,9 @@ public class GameManagerScript : MonoBehaviour {
     public int foodDispenserAmount;
     public float maxAltitude;
     public Transform creatures, foods, foodDispensers;
+    public Terrain terrain;
+    public float flowFieldScale;
+    public float flowFieldIncrement;
 
     void Start() {
         SpawnInitialPopulation();
@@ -28,6 +31,8 @@ public class GameManagerScript : MonoBehaviour {
     }
 
     void FixedUpdate() {
+
+        // terrain.terrainData = GenerateTerrain(terrain.terrainData, 20f);
 
         // fixed update won't get called if timescale is set to 0
         if (timeScale != 0)
@@ -41,7 +46,7 @@ public class GameManagerScript : MonoBehaviour {
             Transform food = foods.GetChild(i);
             food.GetComponent<Rigidbody>().AddForce(GetFlowFieldVector(food.position), ForceMode.Acceleration);
         }
-        
+
         // iterate over all creatures
         foreach (GameObject creature in this.population) {
             ApplyFlowField(creature);
@@ -57,6 +62,27 @@ public class GameManagerScript : MonoBehaviour {
 
     }
 
+    private TerrainData GenerateTerrain(TerrainData terrainData, float y) {
+        terrainData.heightmapResolution = worldX + 1;
+        terrainData.size = new Vector3(worldX, worldY, worldZ);
+        terrainData.SetHeights(0, 0, GenerateHeights(y));
+        return terrainData;
+    }
+
+    private float[,] GenerateHeights(float y) {
+        float[,] heights = new float[worldX, worldZ];
+        for (int i = 0; i < worldX; i++) {
+            for (int j = 0; j < worldZ; j++) {
+                Vector3 position = new Vector3(i, y, j);
+                float xCoord = (float)i / worldX * y;
+                float yCoord = (float)j / worldZ * y;
+                heights[i, j] = GetFlowFieldVector(position).x + GetFlowFieldVector(position).z - 0.5f;
+                // heights[i, j] = Mathf.PerlinNoise(xCoord, yCoord);
+            }
+        }
+        return heights;
+    }
+    
     private void LimitCreatureAltitude(GameObject creature) {
         Vector3 newPosition = creature.transform.position;
         newPosition.y = Mathf.Min(maxAltitude, newPosition.y);
@@ -98,9 +124,9 @@ public class GameManagerScript : MonoBehaviour {
     }
 
     private void UpdateFlowField() {
-        this.xOffset += 1f;
-        this.yOffset += 1f;
-        this.zOffset += 1f;
+        this.xOffset += flowFieldIncrement;
+        this.yOffset += flowFieldIncrement;
+        this.zOffset += flowFieldIncrement;
     }
 
     void ApplyFlowField(GameObject creature) {
@@ -113,9 +139,12 @@ public class GameManagerScript : MonoBehaviour {
     public Vector3 GetFlowFieldVector(Vector3 position) {
 
         // offset the noise values of each axis so the vectors look more natural
-        float noiseX = Mathf.PerlinNoise(position.x + position.z + this.xOffset, position.y + this.xOffset) - 0.5f;
-        float noiseY = Mathf.PerlinNoise(position.x + position.z + this.yOffset, position.y + this.yOffset) - 0.5f;
-        float noiseZ = Mathf.PerlinNoise(position.x + position.z + this.zOffset, position.y + this.zOffset) - 0.5f;
+        float noiseX = Mathf.PerlinNoise((float)(position.x) / worldX * flowFieldScale, 
+                                         this.xOffset / worldX * flowFieldScale);
+        float noiseY = Mathf.PerlinNoise((float)(position.y) / worldY * flowFieldScale, 
+                                         this.yOffset / worldY * flowFieldScale);
+        float noiseZ = Mathf.PerlinNoise((float)(position.z) / worldZ * flowFieldScale, 
+                                         this.zOffset / worldZ * flowFieldScale);
         return new Vector3(noiseX, noiseY, noiseZ);
     }
 
