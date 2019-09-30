@@ -9,6 +9,7 @@ public class GameManagerScript : MonoBehaviour {
     public float timeScale = 1f;
     public int initialPopulationSize = 10;
     public int worldX, worldY, worldZ;
+    public float worldNoiseGranuity;
     public int foodDispenserAmount;
     public float flowFieldGranuity;
     public float flowFieldIncrement;
@@ -24,15 +25,15 @@ public class GameManagerScript : MonoBehaviour {
     void Start() {
         SpawnInitialPopulation();
         SpawnFoodDispensers();
-        this.xOffset = 0f;
-        this.yOffset = worldX * worldY;
-        this.zOffset = worldX * worldY * 2;
+        this.xOffset = worldX * worldY;
+        this.yOffset = worldX * worldY * 2;
+        this.zOffset = worldX * worldY * 3;
     }
 
     void FixedUpdate() {
 
         // TODO: implement actual terrain generation
-        terrain.terrainData = GenerateTerrain(terrain.terrainData, 20f);
+        terrain.terrainData = GenerateTerrain(terrain.terrainData);
 
         // fixed update won't get called if timescale is set to 0
         if (timeScale != 0)
@@ -69,18 +70,20 @@ public class GameManagerScript : MonoBehaviour {
 
     }
 
-    private TerrainData GenerateTerrain(TerrainData terrainData, float y) {
+    private TerrainData GenerateTerrain(TerrainData terrainData) {
         terrainData.heightmapResolution = worldX + 1;
         terrainData.size = new Vector3(worldX, worldY, worldZ);
-        terrainData.SetHeights(0, 0, GenerateHeights(y));
+        terrainData.SetHeights(0, 0, GenerateHeights());
         return terrainData;
     }
 
-    private float[,] GenerateHeights(float y) {
+    private float[,] GenerateHeights() {
         float[,] heights = new float[worldX, worldZ];
         for (int i = 0; i < worldX; i++) {
             for (int j = 0; j < worldZ; j++) {
-                heights[i, j] = 0f;
+                float xCoord = (float)i / worldX * worldNoiseGranuity;
+                float yCoord = (float)j / worldZ * worldNoiseGranuity;
+                heights[i, j] = Mathf.PerlinNoise(xCoord, yCoord);
             }
         }
         return heights;
@@ -100,14 +103,9 @@ public class GameManagerScript : MonoBehaviour {
         creature.transform.SetPositionAndRotation(newPosition, creature.transform.rotation);
     }
 
-    float GetGround(float x, float z) {
-        return terrain.terrainData.GetHeight(Mathf.RoundToInt(x), Mathf.RoundToInt(z));
-    }
-
     void SpawnFoodDispensers() {
         for (int i = 0; i < foodDispenserAmount; i++) {
             Vector3 randomPosition = RandomSpawnLocation();
-            randomPosition.y = GetGround(randomPosition.x, randomPosition.z);
             GameObject foodDispenser = Instantiate(foodDispenserPrefab, randomPosition, Quaternion.identity,
                                                    foodDispensers);
             foodDispenser.GetComponent<FoodDispenserScript>().gameManager = gameObject;
@@ -117,7 +115,9 @@ public class GameManagerScript : MonoBehaviour {
     void SpawnInitialPopulation() {
         this.population = new List<GameObject>();
         for (int i = 0; i < this.initialPopulationSize; i++) {
-            SpawnCreature(RandomSpawnLocation());
+            Vector3 randomPosition = RandomSpawnLocation();
+            randomPosition.y += 2f;
+            SpawnCreature(randomPosition);
         }
     }
 
@@ -133,8 +133,8 @@ public class GameManagerScript : MonoBehaviour {
 
     Vector3 RandomSpawnLocation() {
         float x = Random.Range(0, worldX);
-        float y = Random.Range(0, worldY);
         float z = Random.Range(0, worldZ);
+        float y = Terrain.activeTerrain.SampleHeight(new Vector3(x, 0, z));
         return new Vector3(x, y, z);
     }
 
