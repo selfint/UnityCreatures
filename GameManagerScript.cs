@@ -7,9 +7,9 @@ using Random = UnityEngine.Random;
 public class GameManagerScript : MonoBehaviour {
 
     public float timeScale = 1f;
-    public int initialPopulationSize = 10;
     public int worldX, worldY, worldZ;
     public float worldNoiseGranuity;
+    public int initialPopulationSize = 10;
     public int foodDispenserAmount;
     public float flowFieldGranuity;
     public float flowFieldIncrement;
@@ -32,7 +32,7 @@ public class GameManagerScript : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        
+
         // fixed update won't get called if timescale is set to 0
         if (timeScale != 0)
             Time.timeScale = timeScale;
@@ -88,14 +88,26 @@ public class GameManagerScript : MonoBehaviour {
 
     private void WrapObject(GameObject creature) {
         Vector3 newPosition = creature.transform.position;
-        if (newPosition.x > worldX)
+        if (newPosition.x > worldX) {
+            float previousHeight = Terrain.activeTerrain.SampleHeight(newPosition);
             newPosition.x = 0;
-        if (newPosition.z > worldZ)
+            newPosition.y = Terrain.activeTerrain.SampleHeight(new Vector3(newPosition.x, 0, newPosition.y)) + previousHeight;
+        }
+        if (newPosition.z > worldZ) {
+            float previousHeight = Terrain.activeTerrain.SampleHeight(newPosition);
             newPosition.z = 0;
-        if (newPosition.x < 0)
+            newPosition.y = Terrain.activeTerrain.SampleHeight(new Vector3(newPosition.x, 0, newPosition.y)) + previousHeight;
+        }
+        if (newPosition.x < 0) {
+            float previousHeight = Terrain.activeTerrain.SampleHeight(newPosition);
             newPosition.x = worldX;
-        if (newPosition.z < 0)
+            newPosition.y = Terrain.activeTerrain.SampleHeight(new Vector3(newPosition.x, 0, newPosition.y)) + previousHeight;
+        }
+        if (newPosition.z < 0) {
+            float previousHeight = Terrain.activeTerrain.SampleHeight(newPosition);
             newPosition.z = worldZ;
+            newPosition.y = Terrain.activeTerrain.SampleHeight(new Vector3(newPosition.x, 0, newPosition.y)) + previousHeight;
+        }
         newPosition.y = Mathf.Min(worldY, newPosition.y);
         creature.transform.SetPositionAndRotation(newPosition, creature.transform.rotation);
     }
