@@ -20,15 +20,17 @@ public class GameManagerScript : MonoBehaviour {
     public GameObject foodDispenserPrefab;
     public Transform creatures, foods, foodDispensers;
     private List<GameObject> population;
-    private float xOffset, yOffset, zOffset;
+    private float flowFieldOffsetX, flowFieldOffsetY, flowFieldOffsetZ;
+    private float flowFieldCounter;
 
     void Start() {
         InitializeTerrain();
         SpawnInitialPopulation();
         SpawnFoodDispensers();
-        this.xOffset = worldX * worldY;
-        this.yOffset = worldX * worldY * 2;
-        this.zOffset = worldX * worldY * 3;
+        this.flowFieldCounter = 0f;
+        this.flowFieldOffsetX = Mathf.Sin(this.flowFieldCounter);
+        this.flowFieldOffsetX = Mathf.Sin(this.flowFieldCounter + 60);
+        this.flowFieldOffsetX = Mathf.Sin(this.flowFieldCounter + 120);
     }
 
     void FixedUpdate() {
@@ -136,6 +138,7 @@ public class GameManagerScript : MonoBehaviour {
     }
 
     void KillCreature(GameObject creature) {
+        creature.transform.parent = null;
         this.population.Remove(creature);
         Destroy(creature);
     }
@@ -148,9 +151,13 @@ public class GameManagerScript : MonoBehaviour {
     }
 
     private void UpdateFlowField() {
-        this.xOffset += flowFieldIncrement;
-        this.yOffset += flowFieldIncrement;
-        this.zOffset += flowFieldIncrement;
+        this.flowFieldCounter += flowFieldIncrement;
+        if (this.flowFieldCounter == 360f) {
+            this.flowFieldCounter = 0f;
+        }
+        this.flowFieldOffsetX = Mathf.Sin(this.flowFieldCounter);
+        this.flowFieldOffsetX = Mathf.Sin(this.flowFieldCounter + 60);
+        this.flowFieldOffsetX = Mathf.Sin(this.flowFieldCounter + 120);
     }
 
     void ApplyFlowField(GameObject creature) {
@@ -164,11 +171,11 @@ public class GameManagerScript : MonoBehaviour {
 
         // offset the noise values of each axis so the vectors look more natural
         float noiseX = Mathf.PerlinNoise((float)(position.x) / worldX * flowFieldGranuity,
-                                         this.xOffset / worldX * flowFieldGranuity) - flowFieldGranuity / 2f;
+                                         this.flowFieldOffsetX / worldX * flowFieldGranuity) - 0.5f;
         float noiseY = Mathf.PerlinNoise((float)(position.y) / worldY * flowFieldGranuity,
-                                         this.yOffset / worldY * flowFieldGranuity) - flowFieldGranuity / 2f;
+                                         this.flowFieldOffsetX / worldY * flowFieldGranuity) - 0.5f;
         float noiseZ = Mathf.PerlinNoise((float)(position.z) / worldZ * flowFieldGranuity,
-                                         this.zOffset / worldZ * flowFieldGranuity) - flowFieldGranuity / 2f;
+                                         this.flowFieldOffsetX / worldZ * flowFieldGranuity) - 0.5f;
         return new Vector3(noiseX, noiseY, noiseZ) * flowFieldStrength;
     }
 
