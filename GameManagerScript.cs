@@ -15,7 +15,7 @@ public class GameManagerScript : MonoBehaviour {
     public float flowFieldIncrement;
     public float flowFieldStrength;
     public int maxFoods;
-    public Terrain terrain;
+    public Terrain oceanFloor;
     public GameObject creaturePrefab;
     public GameObject foodDispenserPrefab;
     public Transform creatures, foods, foodDispensers;
@@ -23,6 +23,7 @@ public class GameManagerScript : MonoBehaviour {
     private float xOffset, yOffset, zOffset;
 
     void Start() {
+        InitializeTerrain();
         SpawnInitialPopulation();
         SpawnFoodDispensers();
         this.xOffset = worldX * worldY;
@@ -31,10 +32,7 @@ public class GameManagerScript : MonoBehaviour {
     }
 
     void FixedUpdate() {
-
-        // TODO: implement actual terrain generation
-        terrain.terrainData = GenerateTerrain(terrain.terrainData);
-
+        
         // fixed update won't get called if timescale is set to 0
         if (timeScale != 0)
             Time.timeScale = timeScale;
@@ -70,11 +68,10 @@ public class GameManagerScript : MonoBehaviour {
 
     }
 
-    private TerrainData GenerateTerrain(TerrainData terrainData) {
-        terrainData.heightmapResolution = worldX + 1;
-        terrainData.size = new Vector3(worldX, worldY, worldZ);
-        terrainData.SetHeights(0, 0, GenerateHeights());
-        return terrainData;
+    private void InitializeTerrain() {
+        oceanFloor.terrainData.heightmapResolution = worldX + 1;
+        oceanFloor.terrainData.size = new Vector3(worldX, worldY, worldZ);
+        oceanFloor.terrainData.SetHeights(0, 0, GenerateHeights());
     }
 
     private float[,] GenerateHeights() {
