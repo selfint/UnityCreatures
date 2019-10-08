@@ -16,11 +16,10 @@ public class GameManagerScript : MonoBehaviour {
     public float flowFieldGranuity;
     public float flowFieldIncrement;
     public float flowFieldStrength;
-    // this is for computational limits, not part of the algorithm
-    // ideally this would be inifity
-    public int maxFoods, maxCreatures;
+    public int maxFoods, maxCreatures; // for computational limits
     public GameObject creaturePrefab, foodDispenserPrefab, terrainPrefab;
-    public GameObject baseBlockPrefab, mouthBlockPrefab, wombBlockPrefab;
+    public GameObject baseBlockPrefab, mouthBlockPrefab, wombBlockPrefab, sensorBlockPrefab, motorBlockPrefab;
+    public GameObject[] mutationBlocks, dynamicCostBlocks;
     public Transform creatures, foods, foodDispensers;
     private Terrain oceanFloor;
     private List<GameObject> population;
@@ -108,21 +107,18 @@ public class GameManagerScript : MonoBehaviour {
 
     private void MutateCreature(GameObject creature) {
         if (Random.value < addBlockMutationRate) {
-            addBaseBlockMutation(creature);
+            addMutationBlock(creature);
         }
     }
 
-    private void splitBlocksMutation(GameObject creature) {
-        // place a base block between two blocks
+    private void changeDynamicBlockCost(GameObject creature) {
+
     }
 
-    private void changeBaseBlockMutation(GameObject creature) {
-        // repalce a base block with a different block
-    }
-
-    private void addBaseBlockMutation(GameObject creature) {
+    private void addMutationBlock(GameObject creature) {
         CreatureScript creatureScript = creature.GetComponent<CreatureScript>();
-        GameObject newBlock = Instantiate(baseBlockPrefab, creature.transform);
+        GameObject newBlock = Instantiate(this.mutationBlocks[Random.Range(0, this.mutationBlocks.Length)],
+                                          creature.transform);
         Vector3 blockPosition = getRandomBlockPosition(creatureScript);
         newBlock.transform.localPosition = blockPosition;
         creatureScript.blocks.Add(newBlock);
