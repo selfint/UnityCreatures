@@ -17,9 +17,8 @@ public class GameManagerScript : MonoBehaviour {
     public float flowFieldStrength;
     public int maxFoods;
     public Terrain oceanFloor;
-    public GameObject creaturePrefab;
-    public GameObject foodDispenserPrefab;
-    public GameObject blockPrefab;
+    public GameObject creaturePrefab, foodDispenserPrefab;
+    public GameObject defaultBlockPrefab, mouthBlockPrefab, wombBlockPrefab;
     public Transform creatures, foods, foodDispensers;
     private List<GameObject> population;
     private float flowFieldOffsetX, flowFieldOffsetY, flowFieldOffsetZ;
@@ -60,6 +59,7 @@ public class GameManagerScript : MonoBehaviour {
 
         // iterate over all creatures
         List<GameObject> creaturesToKill = new List<GameObject>();
+        List<GameObject> futureParents = new List<GameObject>();
         foreach (GameObject creature in this.population) {
             ApplyFlowField(creature);
             CreatureScript creatureScript = creature.GetComponent<CreatureScript>();
@@ -70,11 +70,15 @@ public class GameManagerScript : MonoBehaviour {
                 continue;
             }
 
-            // spawn children of creatures wanting to reproduce
+            // remember all creatures that want to have a child
             if (creatureScript.reproduce)
-                SpawnChild(creature);
+                futureParents.Add(creature);
 
             WrapObject(creature);
+        }
+
+        foreach (GameObject creature in futureParents) {
+            SpawnChild(creature);
         }
 
         // kill dead creatures
@@ -100,7 +104,7 @@ public class GameManagerScript : MonoBehaviour {
 
     private void addBlockMutation(GameObject creature) {
         CreatureScript creatureScript = creature.GetComponent<CreatureScript>();
-        GameObject newBlock = Instantiate(blockPrefab, creature.transform);
+        GameObject newBlock = Instantiate(defaultBlockPrefab, creature.transform);
         Vector3 blockPosition = getRandomBlockPosition(creatureScript);
         newBlock.transform.localPosition = blockPosition;
         creatureScript.blocks.Add(newBlock);
@@ -236,10 +240,6 @@ public class GameManagerScript : MonoBehaviour {
 
         // add a flow field vector for each creature using perlin noise
         Vector3 creaturePos = creature.transform.position;
-        if (creature.transform.childCount > 4)
-        {
-            Debug.Log("hello");
-        }
         creature.GetComponent<Rigidbody>().AddForce(GetFlowFieldVector(creaturePos), ForceMode.Acceleration);
     }
 
