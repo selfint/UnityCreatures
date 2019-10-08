@@ -6,13 +6,13 @@ public class CreatureScript : MonoBehaviour {
 
     public Rigidbody rb;
     public List<GameObject> blocks;
-    public float initialHealth;
-    public float initialEnergy;
+    public float initialHealth, initialEnergy;
+    public float maxHealth, maxEnergy;
     public float health, energy;
     public bool dead = false;
     public float foodValueMultiplier;
-    public float costOfLiving;
-    public float dyingSpeed;
+    public float costOfLiving, dyingSpeed, healingSpeed, matingRate;
+    [SerializeField]
     private float reproductionWill;
     public float reproductionThreshold;
     public bool reproduce;
@@ -27,19 +27,18 @@ public class CreatureScript : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        // decrease energy as long as creature is alive
-        this.energy = Mathf.Max(0, this.energy - costOfLiving);
 
-        // if energy is 0 decrease the creature's health
-        if (this.energy <= 0) {
-            this.health -= dyingSpeed;
+        if (this.energy > 0) {
+            this.energy -= costOfLiving;
+            this.health = Mathf.Min(initialHealth, this.health + healingSpeed);
+            if (!this.reproduce)
+                this.reproductionWill += matingRate;
         }
 
-        // if the creature has energy, regain health up to initial health
+        // decrease health if energy is 0
         else {
-            this.health = Mathf.Min(initialHealth, this.health + 1);
-            if (!this.reproduce)
-                this.reproductionWill += 1f;
+            this.energy = 0f;
+            this.health -= dyingSpeed;
         }
 
         // if health is 0 kill this creature
@@ -51,7 +50,7 @@ public class CreatureScript : MonoBehaviour {
             this.reproductionWill = 0f;
 
             // GameManager will take care of generating the new child
-            this.reproduce = false;
+            this.reproduce = true;
         }
 
     }
@@ -66,5 +65,4 @@ public class CreatureScript : MonoBehaviour {
             EatFood(other.gameObject);
         }
     }
-
 }
