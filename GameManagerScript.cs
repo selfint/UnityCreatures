@@ -6,11 +6,12 @@ using Random = UnityEngine.Random;
 
 public class GameManagerScript : MonoBehaviour {
 
-    public float timeScale = 1f;
+    public float timeScale;
     public float addBlockMutationRate;
     public int worldX, worldY, worldZ;
     public float worldNoiseGranuity;
-    public int initialPopulationSize = 10;
+    public int initialPopulationSize;
+    public float birthCost;
     public int foodDispenserAmount;
     public float flowFieldGranuity;
     public float flowFieldIncrement;
@@ -89,6 +90,9 @@ public class GameManagerScript : MonoBehaviour {
     }
 
     private void SpawnChild(GameObject creature) {
+        CreatureScript creatureScript = creature.GetComponent<CreatureScript>();
+        creatureScript.reproduce = false;
+        creatureScript.energy -= birthCost;
         GameObject newChild = Instantiate(creature, creatures);
         this.population.Add(newChild);
         newChild.transform.SetPositionAndRotation(creature.transform.position + new Vector3(1, 1, 1),
