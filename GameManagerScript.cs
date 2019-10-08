@@ -41,10 +41,12 @@ public class GameManagerScript : MonoBehaviour {
         if (timeScale != 0)
             Time.timeScale = timeScale;
 
-        // update flow field to simulate changing currents
         UpdateFlowField();
+        UpdateFoodParticles();
+        UpdateCreatures();
+    }
 
-        // iterate over all food particles
+    private void UpdateFoodParticles() {
         for (int i = 0; i < foods.childCount; i++) {
             GameObject food = foods.GetChild(i).gameObject;
             ApplyFlowField(food);
@@ -57,15 +59,17 @@ public class GameManagerScript : MonoBehaviour {
             food.parent = null;
             Destroy(food.gameObject);
         }
+    }
 
-        // iterate over all creatures
+    private void UpdateCreatures() {
         List<GameObject> creaturesToKill = new List<GameObject>();
         List<GameObject> futureParents = new List<GameObject>();
+
         foreach (GameObject creature in this.population) {
             ApplyFlowField(creature);
             CreatureScript creatureScript = creature.GetComponent<CreatureScript>();
 
-            // ignore, and kill them later dead creatures
+            // ignore dead creatures, and kill them later
             if (creatureScript.dead) {
                 creaturesToKill.Add(creature);
                 continue;
@@ -82,11 +86,9 @@ public class GameManagerScript : MonoBehaviour {
             SpawnChild(creature);
         }
 
-        // kill dead creatures
         for (int i = 0; i < creaturesToKill.Count; i++) {
             KillCreature(creaturesToKill[0]);
         }
-
     }
 
     private void SpawnChild(GameObject creature) {
