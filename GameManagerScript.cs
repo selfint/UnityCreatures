@@ -17,10 +17,10 @@ public class GameManagerScript : MonoBehaviour {
     public float flowFieldIncrement;
     public float flowFieldStrength;
     public int maxFoods;
-    public Terrain oceanFloor;
-    public GameObject creaturePrefab, foodDispenserPrefab;
+    public GameObject creaturePrefab, foodDispenserPrefab, terrainPrefab;
     public GameObject baseBlockPrefab, mouthBlockPrefab, wombBlockPrefab;
     public Transform creatures, foods, foodDispensers;
+    private Terrain oceanFloor;
     private List<GameObject> population;
     private float flowFieldOffsetX, flowFieldOffsetY, flowFieldOffsetZ;
     private float flowFieldCounter;
@@ -163,6 +163,7 @@ public class GameManagerScript : MonoBehaviour {
     }
 
     private void InitializeTerrain() {
+        oceanFloor = Instantiate(terrainPrefab, Vector3.zero, Quaternion.identity).GetComponent<Terrain>();
         oceanFloor.terrainData.heightmapResolution = worldX + 1;
         oceanFloor.terrainData.size = new Vector3(worldX, worldY, worldZ);
         oceanFloor.terrainData.SetHeights(0, 0, GenerateHeights());
