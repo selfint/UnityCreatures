@@ -32,28 +32,15 @@ public class CreatureScript : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        if (this.energy > 0) {
-
-            // heal creature both from starvation and injuries
-            this.health = Mathf.Min(initialHealth, this.health + healingSpeed);
-
-            // only birth one child at a time
-            if (!this.reproduce)
-                this.reproductionWill += matingRate;
-            
-            // the more blocks a creature has the faster it dies
-            this.energy -= costOfLiving * this.blocks.Count;
-        }
-
-        // decrease health if energy is 0
-        else {
-            this.energy = 0f;
-            this.health -= dyingSpeed;
-        }
+        ManageHealthEnergy();
 
         // if health is 0 kill this creature
         if (this.health <= 0)
             this.dead = true;
+
+        // only birth one child at a time
+        if (!this.reproduce)
+            this.reproductionWill += matingRate;
 
         // if reproduction will is high enough, spawn a new child
         if (this.reproductionWill >= this.reproductionThreshold) {
@@ -62,7 +49,22 @@ public class CreatureScript : MonoBehaviour {
             // GameManager will take care of generating the new child
             this.reproduce = true;
         }
+    }
 
+    private void ManageHealthEnergy() {
+        if (this.energy > 0) {
+
+            // heal creature both from starvation and injuries
+            this.health = Mathf.Min(initialHealth, this.health + healingSpeed);
+
+            // the more blocks a creature has the faster it dies
+            this.energy -= costOfLiving * this.blocks.Count;
+        } else {
+            this.energy = 0f;
+
+            // decrease health if creature has no energy (starvation)
+            this.health -= dyingSpeed;
+        }
     }
 
     public void EatFood(GameObject food) {
