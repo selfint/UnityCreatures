@@ -96,6 +96,7 @@ public class GameManagerScript : MonoBehaviour {
         creatureScript.reproduce = false;
         creatureScript.energy -= birthCost;
         GameObject newChild = Instantiate(creature, creatures);
+        newChild.name = creature.name;
         this.population.Add(newChild);
         newChild.transform.SetPositionAndRotation(creature.transform.position + new Vector3(1, 1, 1),
                                                   creature.transform.rotation);
