@@ -9,13 +9,14 @@ public class CreatureScript : MonoBehaviour {
     public float initialHealth, initialEnergy;
     public float maxHealth, maxEnergy;
     public float health, energy;
-    public bool dead = false;
+    public bool dead;
     public float foodValueMultiplier;
     public float costOfLiving, dyingSpeed, healingSpeed, matingRate;
-    [SerializeField]
-    private float reproductionWill;
+    public float blockMass;
     public float reproductionThreshold;
     public bool reproduce;
+    [SerializeField]
+    private float reproductionWill;
 
     void Start() {
         // set the creature mass to be the sum of its blocks mass
@@ -23,13 +24,19 @@ public class CreatureScript : MonoBehaviour {
         this.energy = initialEnergy;
         this.reproductionWill = 0f;
         this.reproduce = false;
-        rb.mass = 20 + this.blocks.Count * 10;    
+        this.dead = false;
+        rb.mass = transform.childCount * blockMass;
+        for (int i = 0; i < transform.childCount; i++) {
+            this.blocks.Add(transform.GetChild(i).gameObject);
+        }
     }
 
     void FixedUpdate() {
 
         if (this.energy > 0) {
-            this.energy -= costOfLiving;
+
+            // the more blocks a creature has the faster it dies
+            this.energy -= costOfLiving * this.blocks.Count;
             this.health = Mathf.Min(initialHealth, this.health + healingSpeed);
             if (!this.reproduce)
                 this.reproductionWill += matingRate;
