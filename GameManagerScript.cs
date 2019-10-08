@@ -114,6 +114,10 @@ public class GameManagerScript : MonoBehaviour {
         List<Vector3> options = new List<Vector3>();
         foreach (GameObject block in creature.blocks) {
 
+            // can't spawn a block from a mouth (to prevent mouths being inside a body)
+            if (block.tag == "Mouth")
+                continue;
+
             // assume all faces have no adjascent blocks
             List<Vector3> blockOptions = new List<Vector3>();
             for (int i = -1; i < 2; i++) {
