@@ -7,6 +7,7 @@ using Random = UnityEngine.Random;
 public class GameManagerScript : MonoBehaviour {
 
     public float timeScale = 1f;
+    public float addBlockMutationRate;
     public int worldX, worldY, worldZ;
     public float worldNoiseGranuity;
     public int initialPopulationSize = 10;
@@ -18,6 +19,7 @@ public class GameManagerScript : MonoBehaviour {
     public Terrain oceanFloor;
     public GameObject creaturePrefab;
     public GameObject foodDispenserPrefab;
+    public GameObject blockPrefab;
     public Transform creatures, foods, foodDispensers;
     private List<GameObject> population;
     private float flowFieldOffsetX, flowFieldOffsetY, flowFieldOffsetZ;
@@ -57,17 +59,87 @@ public class GameManagerScript : MonoBehaviour {
         }
 
         // iterate over all creatures
+        List<GameObject> creaturesToKill = new List<GameObject>();
         foreach (GameObject creature in this.population) {
             ApplyFlowField(creature);
             CreatureScript creatureScript = creature.GetComponent<CreatureScript>();
 
-            // kill dead creatures
-            if (creatureScript.dead)
-                KillCreature(creature);
+            // ignore, and kill them later dead creatures
+            if (creatureScript.dead) {
+                creaturesToKill.Add(creature);
+                continue;
+            }
+
+            // spawn children of creatures wanting to reproduce
+            if (creatureScript.reproduce)
+                SpawnChild(creature);
 
             WrapObject(creature);
         }
 
+        // kill dead creatures
+        for (int i = 0; i < creaturesToKill.Count; i++) {
+            KillCreature(creaturesToKill[0]);
+        }
+
+    }
+
+    private void SpawnChild(GameObject creature) {
+        GameObject newChild = Instantiate(creature, creatures);
+        this.population.Add(newChild);
+        newChild.transform.SetPositionAndRotation(creature.transform.position + new Vector3(1, 1, 1),
+                                                  creature.transform.rotation);
+        MutateCreature(newChild);
+    }
+
+    private void MutateCreature(GameObject creature) {
+        if (Random.value < addBlockMutationRate) {
+            addBlockMutation(creature);
+        }
+    }
+
+    private void addBlockMutation(GameObject creature) {
+        CreatureScript creatureScript = creature.GetComponent<CreatureScript>();
+        GameObject newBlock = Instantiate(blockPrefab, creature.transform);
+        Vector3 blockPosition = getRandomBlockPosition(creatureScript);
+        newBlock.transform.localPosition = blockPosition;
+        creatureScript.blocks.Add(newBlock);
+    }
+
+    private Vector3 getRandomBlockPosition(CreatureScript creature) {
+        List<Vector3> options = new List<Vector3>();
+        foreach (GameObject block in creature.blocks) {
+
+            // assume all faces have no adjascent blocks
+            List<Vector3> blockOptions = new List<Vector3>();
+            for (int i = -1; i < 2; i++) {
+                for (int j = -1; j < 2; j++) {
+                    for (int k = -1; k < 2; k++) {
+                        Vector3 newOffset = new Vector3(i, j, k);
+                        Vector3 newPosition = block.transform.localPosition + newOffset;
+                        if (!options.Contains(newPosition) && newOffset.magnitude == 1)
+                            blockOptions.Add(newPosition);
+                    }
+                }
+            }
+
+            // remove all options that contain a block (this also removes the block 'block')
+            foreach (GameObject adj in creature.blocks) {
+                if (blockOptions.Contains(adj.transform.localPosition))
+                    blockOptions.Remove(adj.transform.localPosition);
+            }
+
+            // log block options into all options
+            options.AddRange(blockOptions);
+        }
+
+        // return a random block
+        if (options.Count != 0) {
+            Vector3 randomPosition = options[Random.Range(0, options.Count)];
+            return randomPosition;
+        } else {
+            throw new NotImplementedException("Creature has no room for new block, shouldn't be possible.");
+        }
     }
 
     private void InitializeTerrain() {
@@ -164,6 +236,10 @@ public class GameManagerScript : MonoBehaviour {
 
         // add a flow field vector for each creature using perlin noise
         Vector3 creaturePos = creature.transform.position;
+        if (creature.transform.childCount > 4)
+        {
+            Debug.Log("hello");
+        }
         creature.GetComponent<Rigidbody>().AddForce(GetFlowFieldVector(creaturePos), ForceMode.Acceleration);
     }
 
