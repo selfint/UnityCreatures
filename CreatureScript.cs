@@ -66,7 +66,7 @@ public class CreatureScript : MonoBehaviour {
     }
 
     public void EatFood(GameObject food) {
-        this.energy += food.transform.localScale.x * foodValueMultiplier;
+        this.energy += food.transform.localScale.magnitude * foodValueMultiplier;
         Destroy(food);
     }
 
