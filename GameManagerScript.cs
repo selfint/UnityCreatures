@@ -18,7 +18,7 @@ public class GameManagerScript : MonoBehaviour {
     public int maxFoods;
     public Terrain oceanFloor;
     public GameObject creaturePrefab, foodDispenserPrefab;
-    public GameObject defaultBlockPrefab, mouthBlockPrefab, wombBlockPrefab;
+    public GameObject baseBlockPrefab, mouthBlockPrefab, wombBlockPrefab;
     public Transform creatures, foods, foodDispensers;
     private List<GameObject> population;
     private float flowFieldOffsetX, flowFieldOffsetY, flowFieldOffsetZ;
@@ -98,13 +98,21 @@ public class GameManagerScript : MonoBehaviour {
 
     private void MutateCreature(GameObject creature) {
         if (Random.value < addBlockMutationRate) {
-            addBlockMutation(creature);
+            addBaseBlockMutation(creature);
         }
     }
 
-    private void addBlockMutation(GameObject creature) {
+    private void splitBlocksMutation(GameObject creature) {
+        // place a base block between two blocks
+    }
+
+    private void changeBaseBlockMutation(GameObject creature) {
+        // repalce a base block with a different block
+    }
+
+    private void addBaseBlockMutation(GameObject creature) {
         CreatureScript creatureScript = creature.GetComponent<CreatureScript>();
-        GameObject newBlock = Instantiate(defaultBlockPrefab, creature.transform);
+        GameObject newBlock = Instantiate(baseBlockPrefab, creature.transform);
         Vector3 blockPosition = getRandomBlockPosition(creatureScript);
         newBlock.transform.localPosition = blockPosition;
         creatureScript.blocks.Add(newBlock);
