@@ -19,13 +19,18 @@ public class CreatureScript : MonoBehaviour {
     private float reproductionWill;
 
     void Start() {
-        // set the creature mass to be the sum of its blocks mass
+        
+        // initialize variables
         this.health = initialHealth;
         this.energy = initialEnergy;
         this.reproductionWill = 0f;
         this.reproduce = false;
         this.dead = false;
+
+        // set the creature mass to be the sum of its blocks mass
         rb.mass = transform.childCount * blockMass;
+
+        // map the children of this objects as a list
         for (int i = 0; i < transform.childCount; i++) {
             this.blocks.Add(transform.GetChild(i).gameObject);
         }
