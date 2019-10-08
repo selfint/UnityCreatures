@@ -16,7 +16,9 @@ public class GameManagerScript : MonoBehaviour {
     public float flowFieldGranuity;
     public float flowFieldIncrement;
     public float flowFieldStrength;
-    public int maxFoods;
+    // this is for computational limits, not part of the algorithm
+    // ideally this would be inifity
+    public int maxFoods, maxCreatures;
     public GameObject creaturePrefab, foodDispenserPrefab, terrainPrefab;
     public GameObject baseBlockPrefab, mouthBlockPrefab, wombBlockPrefab;
     public Transform creatures, foods, foodDispensers;
@@ -83,7 +85,8 @@ public class GameManagerScript : MonoBehaviour {
         }
 
         foreach (GameObject creature in futureParents) {
-            SpawnChild(creature);
+            if (this.population.Count < maxCreatures)
+                SpawnChild(creature);
         }
 
         for (int i = 0; i < creaturesToKill.Count; i++) {
