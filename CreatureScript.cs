@@ -32,14 +32,17 @@ public class CreatureScript : MonoBehaviour {
     }
 
     void FixedUpdate() {
-
         if (this.energy > 0) {
 
-            // the more blocks a creature has the faster it dies
-            this.energy -= costOfLiving * this.blocks.Count;
+            // heal creature both from starvation and injuries
             this.health = Mathf.Min(initialHealth, this.health + healingSpeed);
+
+            // only birth one child at a time
             if (!this.reproduce)
                 this.reproductionWill += matingRate;
+            
+            // the more blocks a creature has the faster it dies
+            this.energy -= costOfLiving * this.blocks.Count;
         }
 
         // decrease health if energy is 0
