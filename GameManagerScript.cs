@@ -9,6 +9,7 @@ public class GameManagerScript : MonoBehaviour {
     public float timeScale;
     public float addBlockMutationRate;
     public int worldX, worldY, worldZ;
+    public int terrainHeight;
     public float worldNoiseGranuity;
     public int initialPopulationSize;
     public float birthCost;
@@ -56,7 +57,7 @@ public class GameManagerScript : MonoBehaviour {
 
         // limit food amount
         for (int i = foods.childCount - 1; i >= maxFoods; i--) {
-            Transform food = foods.GetChild(i);
+            Transform food = foods.GetChild(0);
             food.parent = null;
             Destroy(food.gameObject);
         }
@@ -180,7 +181,7 @@ public class GameManagerScript : MonoBehaviour {
     private void InitializeTerrain() {
         oceanFloor = Instantiate(terrainPrefab, Vector3.zero, Quaternion.identity).GetComponent<Terrain>();
         oceanFloor.terrainData.heightmapResolution = worldX + 1;
-        oceanFloor.terrainData.size = new Vector3(worldX, worldY, worldZ);
+        oceanFloor.terrainData.size = new Vector3(worldX, terrainHeight, worldZ);
         oceanFloor.terrainData.SetHeights(0, 0, GenerateHeights());
     }
 
