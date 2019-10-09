@@ -12,6 +12,7 @@ public class FoodDispenserScript : MonoBehaviour {
     private float lastSpawn;
     public float foodVariance;
     public float foodMinSize;
+    public float ejectionForce;
 
     // Start is called before the first frame update
     void Start() {
@@ -36,5 +37,8 @@ public class FoodDispenserScript : MonoBehaviour {
                                       gameManager.GetComponent<GameManagerScript>().foods);
         float foodSize = Random.Range(foodMinSize, foodMinSize + foodVariance);
         food.transform.localScale = new Vector3(foodSize, foodSize, foodSize);
+        food.GetComponent<Rigidbody>().AddForce(
+            new Vector3(Random.Range(-1f, 1f), 0.5f, Random.Range(-1f, 1f)).normalized * ejectionForce, 
+            ForceMode.Impulse);
     }
 }
