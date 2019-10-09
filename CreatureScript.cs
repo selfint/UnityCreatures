@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,24 +10,21 @@ public class CreatureScript : MonoBehaviour {
     [System.NonSerialized]
     public CreatureBrainScript brain;
     public GameObject[] inputBlocks, outputBlocks;
+    public int passiveInputAmount;
     public float initialHealth, initialEnergy;
     public float maxHealth, maxEnergy;
     public float health, energy;
     public bool dead;
     public float foodValueMultiplier;
-    public float costOfLiving, dyingSpeed, healingSpeed, matingRate;
+    public float costOfLiving, dyingSpeed, healingSpeed;
     public float blockMass;
-    public float reproductionThreshold;
     public bool reproduce;
-    [SerializeField]
-    private float reproductionWill;
 
     void Start() {
 
         // initialize variables
         this.health = initialHealth;
         this.energy = initialEnergy;
-        this.reproductionWill = 0f;
         this.reproduce = false;
         this.dead = false;
 
@@ -38,73 +36,98 @@ public class CreatureScript : MonoBehaviour {
         List<GameObject> inputs = new List<GameObject>(), outputs = new List<GameObject>();
         for (int i = 0; i < transform.childCount; i++) {
             GameObject block = transform.GetChild(i).gameObject;
-            if (block.tag == "ScentSensor") {
-                inputs.Add(block);
-            } else if (block.tag == "Womb") {
-                outputs.Add(block);
-            } else if (block.tag == "Motor") {
-                for (int j = 0; j < 5; j++) {
+            switch (block.tag) {
+                case "ScentSensor":
+                    inputs.Add(block);
+                    break;
+                case "Womb":
                     outputs.Add(block);
-                }
+                    break;
+                case "Motor":
+                    outputs.Add(block);
+                    break;
             }
             this.blocks.Add(block);
         }
+        this.passiveInputAmount = 2;
         this.inputBlocks = inputs.ToArray();
         this.outputBlocks = outputs.ToArray();
-        this.brain = new CreatureBrainScript(inputBlocks.Length, outputBlocks.Length);
+        this.brain = new CreatureBrainScript(inputBlocks.Length + passiveInputAmount, outputBlocks.Length);
     }
 
     void FixedUpdate() {
         ManagePassiveStats();
-        ManageReproduction();
         ManageBlocks();
     }
 
-    private void ManageReproduction() {
-        // if reproduction will is high enough, spawn a new child
-        if (this.reproductionWill >= this.reproductionThreshold) {
-            this.reproductionWill = 0f;
-
-            // GameManager will set this to false when it creates the child
-            this.reproduce = true;
-        }
-    }
-
     public void ManageBlocks() {
-        float[] inputs = GetInputs();
+        List<float> inputs = GetInputs();
         PerformActions(inputs);
     }
 
-    private void PerformActions(float[] inputs) {
-        float[] outputs = this.brain.FeedForward(inputs);
-        for (int i = 0; i < outputs.Length; i++) {
-            if (this.outputBlocks[i].tag == "Motor") {
-                ActivateMotor(this.outputBlocks[i], outputs[i], 1);
-            } else if (this.outputBlocks[i].tag == "Womb") {
-                this.reproductionWill += matingRate * outputs[i];
-            }
-        }
+    private List<float> GetInputs() {
+        List<float> inputs = new List<float>();
+        inputs.AddRange(GetActiveInputs());
+        inputs.AddRange(GetPassiveInputs());
+        return inputs;
     }
 
-    private float[] GetInputs() {
-        float[] inputs = new float[inputBlocks.Length];
+    private List<float> GetPassiveInputs() {
+        List<float> inputs = new List<float> {
+            this.health / maxHealth,
+            this.energy / maxEnergy
+        };
+        return inputs;
+    }
+
+    private List<float> GetActiveInputs() {
+        List<float> inputs = new List<float>();
         for (int i = 0; i < inputBlocks.Length; i++) {
-            if (this.inputBlocks[i].tag == "ScentSensor") {
-                inputs[i] = GetScentSensorInput(this.inputBlocks[i], 100);
+            switch (this.inputBlocks[i].tag) {
+                case "ScentSensor":
+                    inputs.Add(GetScentSensorInput(this.inputBlocks[i]));
+                    break;
             }
         }
 
         return inputs;
     }
 
-    public void ActivateMotor(GameObject motor, float input, float motorStrength) {
-        if (input > 0.5f) {
-            rb.AddForce(motor.transform.forward * input * Time.deltaTime * motorStrength, ForceMode.Force);
-            this.energy -= motorStrength;
+    private void PerformActions(List<float> inputs) {
+        float[] outputs = this.brain.FeedForward(inputs);
+        for (int i = 0; i < outputs.Length; i++) {
+            switch (this.outputBlocks[i].tag) {
+                case "Motor":
+                    ActivateMotor(this.outputBlocks[i], outputs[i]);
+                    break;
+                case "Womb":
+                    ActivateWomb(outputs[i]);
+                    break;
+            }
         }
     }
 
-    public float GetScentSensorInput(GameObject scentSensor, float scentSensorRange) {
+    public void ActivateMotor(GameObject motor, float input) {
+        float motorStrength = 1f;
+        float motorForce = input * motorStrength;
+        float motorCost = motorForce * 10f;
+        if (input > 0.5f && this.energy >= motorCost) {
+            rb.AddForce(motor.transform.forward * Time.deltaTime * motorForce, ForceMode.Force);
+            this.energy -= motorCost;
+        }
+    }
+
+    private void ActivateWomb(float input) {
+        float wombCost = 100f;
+        if (input > 0.5f && this.energy >= wombCost) {
+
+            // GameManager will set this to false when it creates the child
+            this.reproduce = true;
+        }
+    }
+
+    public float GetScentSensorInput(GameObject scentSensor) {
+        float scentSensorRange = 100f;
         // get the distance to the nearest food particle
         float minDistance = scentSensorRange;
         foreach (GameObject food in GameObject.FindGameObjectsWithTag("Food")) {
@@ -122,7 +145,7 @@ public class CreatureScript : MonoBehaviour {
         if (this.energy > 0) {
 
             // heal creature both from starvation and injuries
-            this.health = Mathf.Min(initialHealth, this.health + healingSpeed);
+            this.health = Mathf.Min(maxHealth, this.health + healingSpeed);
 
             // the more blocks a creature has the faster it dies
             this.energy -= costOfLiving * this.blocks.Count;
