@@ -98,11 +98,11 @@ public class GameManagerScript : MonoBehaviour {
         // parent actions
         CreatureScript creatureScript = creature.GetComponent<CreatureScript>();
         creatureScript.reproduce = false;
-        creatureScript.energy -= birthCost;
 
         // child actions
         GameObject newChild = Instantiate(creature, creatures);
-        newChild.transform.SetPositionAndRotation(creature.transform.position + new Vector3(1, 1, 1),
+        Vector3 offset = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
+        newChild.transform.SetPositionAndRotation(creature.transform.position + offset,
                                                   creature.transform.rotation);
         MutateCreature(newChild);
         NewCreature(newChild);

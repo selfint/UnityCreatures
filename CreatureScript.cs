@@ -119,10 +119,11 @@ public class CreatureScript : MonoBehaviour {
 
     private void ActivateWomb(float input) {
         float wombCost = 100f;
-        if (input > 0.5f && this.energy >= wombCost) {
+        if (input > 0.5f && this.energy >= wombCost && !this.reproduce) {
 
             // GameManager will set this to false when it creates the child
             this.reproduce = true;
+            this.energy -= wombCost;
         }
     }
 
@@ -151,6 +152,7 @@ public class CreatureScript : MonoBehaviour {
             this.energy -= costOfLiving * this.blocks.Count;
         } else {
             this.energy = 0f;
+            this.reproduce = false;
 
             // decrease health if creature has no energy (starvation)
             this.health -= dyingSpeed;
