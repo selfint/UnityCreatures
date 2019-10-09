@@ -102,11 +102,20 @@ public class GameManagerScript : MonoBehaviour {
 
         // child actions
         GameObject newChild = Instantiate(creature, creatures);
-        newChild.name = creature.name;
-        this.population.Add(newChild);
         newChild.transform.SetPositionAndRotation(creature.transform.position + new Vector3(1, 1, 1),
                                                   creature.transform.rotation);
         MutateCreature(newChild);
+        NewCreature(newChild);
+    }
+
+    private void SpawnCreature(Vector3 location) {
+        GameObject newCreature = Instantiate(creaturePrefab, location, Random.rotation, creatures);
+        NewCreature(newCreature);
+    }
+
+    private void NewCreature(GameObject newCreature) {
+        this.population.Add(newCreature);
+        newCreature.name = "Creature";
     }
 
     private void MutateCreature(GameObject creature) {
@@ -229,11 +238,6 @@ public class GameManagerScript : MonoBehaviour {
             randomPosition.y += 2f;
             SpawnCreature(randomPosition);
         }
-    }
-
-    void SpawnCreature(Vector3 location) {
-        GameObject newCreature = Instantiate(creaturePrefab, location, Random.rotation, creatures);
-        this.population.Add(newCreature);
     }
 
     void KillCreature(GameObject creature) {
