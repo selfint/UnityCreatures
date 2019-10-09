@@ -31,7 +31,7 @@ public class CreatureBrainScript {
         }
     }
 
-    public virtual float[] FeedForward(float[] inputSignals) {
+    public float[] FeedForward(List<float> inputSignals) {
         float[] brainOutput = new float[outputAmount];
         for (int j = 0; j < outputAmount; j++) {
 
