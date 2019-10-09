@@ -30,10 +30,14 @@ public class CreatureScript : MonoBehaviour {
 
         // set the creature mass to be the sum of its blocks mass
         rb.mass = transform.childCount * blockMass;
+        UpdateBody();
+    }
 
+    public void UpdateBody() {
         // map the children of this objects as a list
         // find how many inputs (sensors) and outputs (actions) the creature has
         List<GameObject> inputs = new List<GameObject>(), outputs = new List<GameObject>();
+        this.blocks = new List<GameObject>();
         for (int i = 0; i < transform.childCount; i++) {
             GameObject block = transform.GetChild(i).gameObject;
             switch (block.tag) {
