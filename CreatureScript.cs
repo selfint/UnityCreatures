@@ -6,6 +6,8 @@ public class CreatureScript : MonoBehaviour {
 
     public Rigidbody rb;
     public List<GameObject> blocks;
+    [System.NonSerialized]
+    public CreatureBrainScript brain;
     public float initialHealth, initialEnergy;
     public float maxHealth, maxEnergy;
     public float health, energy;

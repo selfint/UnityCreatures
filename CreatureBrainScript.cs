@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WombBlockScript : MonoBehaviour {
-    public bool mutationBlock;
-    public bool dynamicCostBlock;
-    public float cost;
+public class CreatureBrainScript
+{
     public Neuron[] neurons;
     public float[] outputs;
 
@@ -22,5 +20,4 @@ public class WombBlockScript : MonoBehaviour {
     public virtual void UnconsciousAction() {
 
     }
-
 }
