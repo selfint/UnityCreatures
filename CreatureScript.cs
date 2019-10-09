@@ -20,7 +20,7 @@ public class CreatureScript : MonoBehaviour {
     public float blockMass;
     public bool reproduce;
 
-    void Start() {
+    void Awake() {
 
         // initialize variables
         this.health = initialHealth;
@@ -126,7 +126,7 @@ public class CreatureScript : MonoBehaviour {
         if (input > 0.5f && this.energy >= wombCost && !this.reproduce) {
 
             // GameManager will set this to false when it creates the child
-            this.reproduce = true;
+            this.reproduce = false;
             this.energy -= wombCost;
         }
     }

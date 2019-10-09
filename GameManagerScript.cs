@@ -94,34 +94,53 @@ public class GameManagerScript : MonoBehaviour {
         }
     }
 
-    private void SpawnChild(GameObject creature) {
+    private void SpawnChild(GameObject parent) {
 
         // parent actions
-        CreatureScript creatureScript = creature.GetComponent<CreatureScript>();
-        creatureScript.reproduce = false;
+        CreatureScript parentScript = parent.GetComponent<CreatureScript>();
+        parentScript.reproduce = false;
 
         // child actions
-        GameObject newChild = Instantiate(creature, creatures);
+        GameObject newChild = Instantiate(parent, creatures);
+        CreatureScript childScript = newChild.GetComponent<CreatureScript>();
         Vector3 offset = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
-        newChild.transform.SetPositionAndRotation(creature.transform.position + offset,
-                                                  creature.transform.rotation);
+        newChild.transform.SetPositionAndRotation(parent.transform.position + offset,
+                                                  parent.transform.rotation);
         MutateCreature(newChild);
-        NewCreature(newChild);
+        AddToPopulation(newChild);
+
+        // copy the weights and biases of the parent into the child
+        // if any new weights appeared through mutation, they won't be affected
+        // since all children of the transfroms will be the same (in the same order)
+        // and the new blocks will appear last.
+        UpdateChildBrain(childScript, parentScript);
+    }
+
+    private void UpdateChildBrain(CreatureScript childScript, CreatureScript parentScript) {
+        for (int i = 0; i < parentScript.brain.weights.Length; i++) {
+            for (int j = 0; j < parentScript.brain.weights[i].Length; j++) {
+                childScript.brain.weights[i][j] = parentScript.brain.weights[i][j];
+            }
+        }
+
+        for (int i = 0; i < parentScript.brain.biases.Length; i++) {
+            childScript.brain.biases[i] = parentScript.brain.biases[i];
+        }
     }
 
     private void SpawnCreature(Vector3 location) {
         GameObject newCreature = Instantiate(creaturePrefab, location, Random.rotation, creatures);
-        NewCreature(newCreature);
+        AddToPopulation(newCreature);
     }
 
-    private void NewCreature(GameObject newCreature) {
+    private void AddToPopulation(GameObject newCreature) {
         this.population.Add(newCreature);
         newCreature.name = "Creature";
     }
 
-    private void MutateCreature(GameObject creature) {
+    private void MutateCreature(GameObject child) {
         if (Random.value < addBlockMutationRate) {
-            addMutationBlock(creature);
+            addMutationBlock(child);
         }
     }
 
@@ -129,13 +148,13 @@ public class GameManagerScript : MonoBehaviour {
 
     }
 
-    private void addMutationBlock(GameObject creature) {
-        CreatureScript creatureScript = creature.GetComponent<CreatureScript>();
+    private void addMutationBlock(GameObject child) {
+        CreatureScript childScript = child.GetComponent<CreatureScript>();
         GameObject newBlock = Instantiate(this.mutationBlocks[Random.Range(0, this.mutationBlocks.Length)],
-                                          creature.transform);
-        Vector3 blockPosition = getRandomBlockPosition(creatureScript);
+                                          child.transform);
+        Vector3 blockPosition = getRandomBlockPosition(childScript);
         newBlock.transform.localPosition = blockPosition;
-        creatureScript.blocks.Add(newBlock);
+        childScript.UpdateBody();
     }
 
     private Vector3 getRandomBlockPosition(CreatureScript creature) {
