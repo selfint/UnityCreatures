@@ -94,9 +94,13 @@ public class GameManagerScript : MonoBehaviour {
     }
 
     private void SpawnChild(GameObject creature) {
+
+        // parent actions
         CreatureScript creatureScript = creature.GetComponent<CreatureScript>();
         creatureScript.reproduce = false;
         creatureScript.energy -= birthCost;
+
+        // child actions
         GameObject newChild = Instantiate(creature, creatures);
         newChild.name = creature.name;
         this.population.Add(newChild);
