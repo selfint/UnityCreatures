@@ -37,11 +37,7 @@ public class CreatureScript : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        ManageHealthEnergy();
-
-        // if health is 0 kill this creature
-        if (this.health <= 0)
-            this.dead = true;
+        ManagePassiveStats();
 
         // only birth one child at a time
         if (!this.reproduce)
@@ -56,7 +52,7 @@ public class CreatureScript : MonoBehaviour {
         }
     }
 
-    private void ManageHealthEnergy() {
+    private void ManagePassiveStats() {
         if (this.energy > 0) {
 
             // heal creature both from starvation and injuries
@@ -70,6 +66,10 @@ public class CreatureScript : MonoBehaviour {
             // decrease health if creature has no energy (starvation)
             this.health -= dyingSpeed;
         }
+
+        // if health is 0 kill this creature
+        if (this.health <= 0)
+            this.dead = true;
     }
 
     public void EatFood(GameObject food) {
