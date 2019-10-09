@@ -34,10 +34,14 @@ public class CreatureBrainScript {
     public virtual float[] FeedForward(float[] inputSignals) {
         float[] brainOutput = new float[outputAmount];
         for (int j = 0; j < outputAmount; j++) {
+
+            // get the weighted sum of inputs for each neuron
             float neuronInput = 0f;
             for (int i = 0; i < inputAmount; i++) {
                 neuronInput += inputSignals[i] * this.weights[i][j];
             }
+
+            // apply an activation function on neuronInput and add its bias
             brainOutput[j] = Sigmoid(neuronInput) + this.biases[j];
         }
 
