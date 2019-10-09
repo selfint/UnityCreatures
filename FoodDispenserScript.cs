@@ -5,6 +5,7 @@ using UnityEngine;
 public class FoodDispenserScript : MonoBehaviour {
 
     public GameObject foodPrefab;
+    [System.NonSerialized]
     public GameObject gameManager;
     public Transform foodSpawnLocation;
     public float foodSpawnRate;
