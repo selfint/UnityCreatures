@@ -40,8 +40,12 @@ public class CreatureScript : MonoBehaviour {
             GameObject block = transform.GetChild(i).gameObject;
             if (block.tag == "ScentSensor") {
                 inputs.Add(block);
-            } else if (block.tag == "Motor" || block.tag == "Womb") {
+            } else if (block.tag == "Womb") {
                 outputs.Add(block);
+            } else if (block.tag == "Motor") {
+                for (int j = 0; j < 5; j++) {
+                    outputs.Add(block);
+                }
             }
             this.blocks.Add(block);
         }
@@ -67,24 +71,40 @@ public class CreatureScript : MonoBehaviour {
     }
 
     public void ManageBlocks() {
-        float[] inputs = new float[inputBlocks.Length];
-        for (int i = 0; i < inputBlocks.Length; i++) {
-            if (this.inputBlocks[i].tag == "ScentSensor") {
-                inputs[i] = ManageScentSensor(this.inputBlocks[i], 100);
-            }
-        }
+        float[] inputs = GetInputs();
+        PerformActions(inputs);
+    }
 
+    private void PerformActions(float[] inputs) {
         float[] outputs = this.brain.FeedForward(inputs);
         for (int i = 0; i < outputs.Length; i++) {
             if (this.outputBlocks[i].tag == "Motor") {
-                rb.AddForce(this.outputBlocks[i].transform.forward * outputs[i] * Time.deltaTime * 10, ForceMode.Force);
+                ActivateMotor(this.outputBlocks[i], outputs[i], 1);
             } else if (this.outputBlocks[i].tag == "Womb") {
                 this.reproductionWill += matingRate * outputs[i];
             }
         }
     }
 
-    public float ManageScentSensor(GameObject scentSensor, float scentSensorRange) {
+    private float[] GetInputs() {
+        float[] inputs = new float[inputBlocks.Length];
+        for (int i = 0; i < inputBlocks.Length; i++) {
+            if (this.inputBlocks[i].tag == "ScentSensor") {
+                inputs[i] = GetScentSensorInput(this.inputBlocks[i], 100);
+            }
+        }
+
+        return inputs;
+    }
+
+    public void ActivateMotor(GameObject motor, float input, float motorStrength) {
+        if (input > 0.5f) {
+            rb.AddForce(motor.transform.forward * input * Time.deltaTime * motorStrength, ForceMode.Force);
+            this.energy -= motorStrength;
+        }
+    }
+
+    public float GetScentSensorInput(GameObject scentSensor, float scentSensorRange) {
         // get the distance to the nearest food particle
         float minDistance = scentSensorRange;
         foreach (GameObject food in GameObject.FindGameObjectsWithTag("Food")) {
